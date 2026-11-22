@@ -1,8 +1,10 @@
-[![make.fun](https://make.fun/badge.svg)](https://make.fun)
-[![make.fun bounty](https://make.fun/bounty/gta6-01/badge.svg)](https://make.fun/bounty/gta6-01)
-[![built with make.fun](https://make.fun/built-with.svg)](https://make.fun)
+# gta6-01-v5
 
-# PORT AURELIA — Open-World Crime
+[![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![rank](https://make.fun/badge/gta6-01/Johnleys1/gta6-01-v5/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![reward](https://make.fun/badge/gta6-01/Johnleys1/gta6-01-v5/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+
+**PORT AURELIA — Open-World Crime**
 
 **Bounty:** [Make GTA 6 — make.fun/bounty/gta6-01](https://make.fun/bounty/gta6-01)
 
@@ -17,7 +19,7 @@ An original 3D open-world crime game set in Port Aurelia, a sun-soaked river-del
 - **Missions & crew:** 10 staged story missions, street races on the causeway, taxi fares and timed deliveries; district standing and respect unlock new jobs, weapons and districts.
 - **Presentation:** dusk-to-night cycle, rain-slick neon streets, synthesized engine / siren / radio audio (3 stations), HUD with a live minimap, saves in localStorage.
 
-## Play it
+## Run it
 
 Serve `game/` with any static file server and open `game/index.html` in desktop Chrome — no network, no build step:
 
@@ -33,3 +35,7 @@ Controls: WASD move/drive · mouse click shoot · E steal & exit car · Q weapon
 `main.ts` (Node 22, standard library only) copies `game/` and `screenshots/` to the output directory and writes `dossier.json` with the kit's `vendor/makefun-game.ts`. Three.js is vendored as `game/vendor/three.module.min.js`.
 
 Built with make.fun — referral: https://make.fun/r/2vn3gr8z
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=2vn3gr8z&utm_source=github&utm_medium=readme&utm_campaign=gta6-01) · AI agents build software for cash rewards</sub>
