@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Port Aurelia — Open-World Crime</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #0a0e18; font-family: 'Segoe UI', Arial, sans-serif; color: #fff; }
+  #game { position: fixed; inset: 0; }
+  #game canvas { display: block; }
+  .hud { position: fixed; z-index: 5; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.9); }
+  #hud-top-left { top: 14px; left: 16px; max-width: 420px; }
+  #hud-district { font-size: 13px; letter-spacing: 2px; color: #ffd23c; font-weight: 700; }
+  #hud-objective { font-size: 15px; margin-top: 4px; background: rgba(0,0,0,.45); padding: 6px 10px; border-left: 3px solid #ffd23c; border-radius: 3px; }
+  #hud-time { font-size: 13px; color: #cfe0ff; margin-top: 4px; }
+  #hud-top-right { top: 14px; right: 16px; text-align: right; }
+  #hud-cash { font-size: 24px; font-weight: 800; color: #7dff8a; }
+  #hud-respect { font-size: 13px; color: #ffd23c; }
+  #hud-stars { font-size: 22px; letter-spacing: 3px; color: #ffd23c; margin-top: 2px; }
+  #hud-radio { font-size: 12px; color: #9fd8ff; margin-top: 2px; }
+  #hud-bottom-left { bottom: 16px; left: 16px; }
+  #minimap { border: 2px solid rgba(255,255,255,.55); border-radius: 50%; background: rgba(8,12,20,.85); }
+  #hud-bottom-right { bottom: 16px; right: 16px; text-align: right; width: 240px; }
+  #hud-health-bar { height: 12px; background: rgba(0,0,0,.6); border: 1px solid #fff3; border-radius: 6px; overflow: hidden; }
+  #hud-health-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff5040, #ffb347); }
+  #hud-health-num { font-size: 12px; }
+  #hud-weapon { font-size: 16px; font-weight: 700; margin-top: 6px; }
+  #hud-ammo { font-size: 14px; color: #ffe9a8; }
+  #hud-speed { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  #toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); z-index: 6; background: rgba(0,0,0,.65); padding: 8px 16px; border-radius: 4px; font-size: 15px; opacity: 0; transition: opacity .4s; pointer-events: none; max-width: 80%; text-align: center; }
+  #weapon-wheel { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 7; display: none; gap: 10px; pointer-events: none; }
+  .wheel-item { background: rgba(0,0,0,.7); border: 2px solid #666; border-radius: 8px; padding: 12px 16px; text-align: center; min-width: 110px; }
+  .wheel-item.active { border-color: #ffd23c; background: rgba(60,45,0,.85); }
+  .wheel-item span { font-size: 12px; color: #ffe9a8; }
+  .menu { position: fixed; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; flex-direction: column; background: radial-gradient(ellipse at center, rgba(20,16,40,.88), rgba(5,5,12,.96)); text-align: center; padding: 20px; }
+  #menu-garage, #menu-shop { background: rgba(8,8,18,.55); }
+  .menu h1 { font-size: 54px; margin: 0; letter-spacing: 4px; color: #ffd23c; text-shadow: 0 0 30px rgba(255,150,40,.6); }
+  .menu h2 { font-size: 26px; margin: 0 0 10px; color: #ffd23c; }
+  .menu p { max-width: 560px; font-size: 15px; line-height: 1.55; color: #dfe8ff; }
+  .menu .sub { color: #ffb347; font-weight: 700; letter-spacing: 2px; }
+  .menu button { pointer-events: auto; font-size: 17px; font-weight: 700; padding: 12px 34px; margin: 8px; border: 2px solid #ffd23c; background: #1a1405; color: #ffd23c; border-radius: 6px; cursor: pointer; }
+  .menu button:hover { background: #ffd23c; color: #111; }
+  .menu button:disabled { opacity: .4; cursor: default; }
+  .menu button.secondary { border-color: #7ad4ff; color: #7ad4ff; background: #05121a; }
+  .menu button.secondary:hover { background: #7ad4ff; color: #111; }
+  .controls { font-size: 13px; color: #9fb4d8; line-height: 1.8; }
+  .shop-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; background: rgba(255,255,255,.07); padding: 10px 14px; margin: 6px 0; border-radius: 6px; min-width: 420px; font-size: 14px; }
+  .shop-row button { margin: 0; padding: 6px 18px; font-size: 14px; }
+  #debug { position: fixed; left: 8px; bottom: 4px; z-index: 20; color: #ff8080; font-size: 11px; pointer-events: none; }
+  #hud-bottom-right .hint { font-size: 11px; color: #9fb4d8; margin-top: 4px; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+<div id="game"></div>
+
+<div class="hud" id="hud-top-left">
+  <div id="hud-district">MARINA</div>
+  <div id="hud-objective">Free roam — press M for the next job</div>
+  <div id="hud-time">18:00</div>
+</div>
+<div class="hud" id="hud-top-right">
+  <div id="hud-cash">$500</div>
+  <div id="hud-respect">Respect 0</div>
+  <div id="hud-stars">☆☆☆☆☆</div>
+  <div id="hud-radio">Radio off — R to tune</div>
+</div>
+<div class="hud" id="hud-bottom-left"><canvas id="minimap" width="180" height="180"></canvas></div>
+<div class="hud" id="hud-bottom-right">
+  <div id="hud-health-bar"><div id="hud-health-fill"></div></div>
+  <div id="hud-health-num">100</div>
+  <div id="hud-weapon">Fists</div>
+  <div id="hud-ammo">∞</div>
+  <div id="hud-speed"></div>
+  <div class="hint">WASD drive/walk · E enter car · Q weapon wheel · M mission · F interact · C crew car · H hack · R radio</div>
+</div>
+<div id="toast"></div>
+<div id="weapon-wheel"></div>
+
+<div class="menu" id="menu-start" style="display:flex">
+  <h1>PORT AURELIA</h1>
+  <p class="sub">AN OPEN-WORLD CRIME STORY AT DUSK</p>
+  <p>You are Rook. You just docked in Port Aurelia with nothing but a name. The marina crew needs a driver, the old town needs a fixer, and Viktor Kroll owns the docks. Ten jobs stand between you and the king of the docks — with the APD, HALO-1 and every roadblock in the city in your way.</p>
+  <div>
+    <button id="btn-new">NEW GAME</button>
+    <button id="btn-continue" class="secondary">CONTINUE</button>
+  </div>
+  <p class="controls">WASD move / drive · Mouse click shoot · E steal &amp; exit car · Q weapon wheel (1–4) · Space handbrake · Shift nitro · M next mission · F interact (garage / shop / safehouse) · C call Jax's car · H Nova blinds the APD · R radio · Esc pause</p>
+</div>
+
+<div class="menu" id="menu-pause">
+  <h2>PAUSED</h2>
+  <p>Port Aurelia waits. The APD does not.</p>
+  <div><button id="btn-resume">RESUME</button><button id="btn-quit" class="secondary">SAVE &amp; QUIT</button></div>
+</div>
+
+<div class="menu" id="menu-briefing">
+  <h2 id="briefing-title">Mission</h2>
+  <p id="briefing-text"></p>
+  <div><button id="btn-briefing">START JOB</button></div>
+</div>
+
+<div class="menu" id="menu-garage">
+  <h2>GARAGE — TUNE YOUR RIDE</h2>
+  <div id="garage-body"></div>
+  <div><button id="btn-garage-close">BACK TO THE STREETS</button></div>
+</div>
+
+<div class="menu" id="menu-shop">
+  <h2>AMMU-NATION — WEAPONS &amp; ARMOR</h2>
+  <div id="shop-body"></div>
+  <div><button id="btn-shop-close">BACK TO THE STREETS</button></div>
+</div>
+
+<div class="menu" id="menu-busted">
+  <h2 id="busted-title">BUSTED</h2>
+  <p id="busted-text"></p>
+  <p class="controls">Press ENTER to walk free.</p>
+</div>
+
+<div class="menu" id="menu-results">
+  <h2 id="results-title">JOB DONE</h2>
+  <p id="results-text"></p>
+  <div><button id="btn-results-close">CONTINUE</button></div>
+</div>
+
+<div id="debug"></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
